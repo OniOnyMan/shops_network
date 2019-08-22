@@ -12,11 +12,11 @@
                 </div>
                 <div class="form-group">
                     <label for="">Банковский счёт</label>
-                    <input type="text" class="form-control" v-model="shop.bank_account">
+                    <input type="number" class="form-control" v-model="shop.bank_account">
                 </div>
                 <div class="form-group">
                     <label for="">Контактный телефон</label>
-                    <input type="text" class="form-control" v-model="shop.contact_phone">
+                    <input type="number" class="form-control" v-model="shop.contact_phone">
                 </div>
                 <div class="form-group">
                     <button class="btn btn-outline-success"
@@ -69,7 +69,7 @@
 
             },
             async save() {
-                if (! this.validate()) return false;
+                if (this.validate()){
                 if  (this.shop.id) {
                     const response = await axios.post('/shops/update/' + this.shop.id, { ...this.shop });
                     if (response.data.status === 'error') {
@@ -82,7 +82,17 @@
                         return true;
                     }
                 } else {
-                    const response = await axios.post('/shops/create', { ...this.shop });
+                    const response = await axios.get('/shops/is_exist_baccount/' + this.shop.bank_account);
+                    if (response.data === true) {
+                        this.$swal('Ошибка', 'Произошла ошибка. Такие банковские реквизиты уже используются', 'error');
+                        return false;
+                    } else {
+                        const response = await axios.get('/shops/is_exist_name/' + this.shop.name);
+                        if (response.data === true) {
+                            this.$swal('Ошибка', 'Произошла ошибка. Такое наименование уже используется', 'error');
+                            return false;
+                        }else{
+                            const response = await axios.post('/shops/create', { ...this.shop });
                     if (response.data.status === 'error') {
                         this.$swal('Ошибка', 'Произошла ошибка. Повторите позднее', 'error');
                         return false;
@@ -92,7 +102,13 @@
                         this.$router.push('/shops');
                         return true;
                     }
+                        }
+
+                    }
+                    
                 }
+                    
+                } else return false;
             },
             async loadData() {
                 const response = await axios.get('/shops/edit/' + this.$route.params.id);

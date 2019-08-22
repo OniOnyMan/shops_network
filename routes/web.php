@@ -57,6 +57,8 @@ Route::group(['prefix' => 'providers'], function () {
     Route::get('/search', 'ProviderController@search');
     Route::get('/products/{id}', 'ProviderController@getProducts')
         ->where('id', '[0-9]+');
+    Route::get('/is_exist_name/{name}', 'ProviderController@is_exist_name');
+    Route::get('/is_exist_baccount/{bank_account}', 'ProviderController@is_exist_baccount');
 });
 
 Route::group(['prefix' => 'shops'], function () {
@@ -69,6 +71,8 @@ Route::group(['prefix' => 'shops'], function () {
     Route::post('/delete/{id}', 'ShopController@destroy')
         ->where('id', '[0-9]+');
     Route::get('/search', 'ShopController@search');
+    Route::get('/is_exist_name/{name}', 'ShopController@is_exist_name');
+    Route::get('/is_exist_baccount/{bank_account}', 'ShopController@is_exist_baccount');
 });
 
 Route::group(['prefix' => 'users', 'is' => 'admin'], function () {
@@ -81,6 +85,7 @@ Route::group(['prefix' => 'users', 'is' => 'admin'], function () {
     Route::post('/delete/{id}', 'UserController@destroy')
         ->where('id', '[0-9]+');
     Route::get('/form_info', 'UserController@form_info');
+    Route::get('/is_exist_email/{name}', 'UserController@is_exist_email');
 });
 Auth::routes();
 

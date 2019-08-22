@@ -105,6 +105,16 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function is_exist_email(string $name)
+    {
+        $provider = User::where('email', $name)->first();
+        if ($provider === null) {
+            return response()->json(false, 200);
+        } else {
+            return response()->json(true, 200);
+        }
+    }
+
     public function form_info()
     {
         $roles = Role::all();

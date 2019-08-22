@@ -109,7 +109,7 @@
               this.roles = response.data.roles;
             },
             async save() {
-                if (! this.validate()) return false;
+                if (this.validate()){;
                 if (this.$route.params.id) {
                     const response = await axios.post('/users/update/' + this.$route.params.id, {...this.user});
                     if (response.data.status === 'success') {
@@ -122,17 +122,23 @@
                     }
 
                 } else {
-                    const response = await axios.post('/users/create', {...this.user});
-                    if (response.data.status === 'success') {
-                        this.$swal('Успешно!', 'Запись о пользователе успешно добавлена', 'success');
-                        this.$router.push({ path: '/users' });
-                        return true;
-                    } else {
-                        this.$swal('Ошибка!', 'Произошла ошибка. Повторите позднее', 'error');
+                    const response = await axios.get('/users/is_exist_email/' + this.user.email);
+                    if (response.data === true) {
+                        this.$swal('Ошибка', 'Произошла ошибка. Такой email уже используется', 'error');
                         return false;
+                    } else {
+                        const response = await axios.post('/users/create', {...this.user});
+                        if (response.data.status === 'success') {
+                            this.$swal('Успешно!', 'Запись о пользователе успешно добавлена', 'success');
+                            this.$router.push({ path: '/users' });
+                            return true;
+                        } else {
+                            this.$swal('Ошибка!', 'Произошла ошибка. Повторите позднее', 'error');
+                            return false;
+                        }
                     }
-
-                }
+                }                    
+                } else return false
             }
         },
 

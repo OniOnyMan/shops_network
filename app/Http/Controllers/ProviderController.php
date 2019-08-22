@@ -20,32 +20,39 @@ class ProviderController extends Controller
         try {
 //            Provider::create($request->all());
 
-            DB::select('call create_provider(?, ?, ?, ?)', [
-                $request->input('name'),
-                $request->input('legal_address'),
-                $request->input('bank_account'),
-                $request->input('contact_phone')
-            ]);
-            $provider = Provider::where(function ($q) use ($request) {
-                $q->where('name', $request->input('name'));
-                $q->where('legal_address', $request->input('legal_address'));
-                $q->where('bank_account', $request->input('bank_account'));
-                $q->where('contact_phone', $request->input('contact_phone'));
-
-            })->first();
-            if ($request->input('products') !== null) {
+            $provider = Provider::where('name', $request->input('name'))
+                                    ->orWhere('bank_account', $request->input('bank_account'))->first();
+            if ($provider === null) 
+            {
+                DB::select('call create_provider(?, ?, ?, ?)', [
+                    $request->input('name'),
+                    $request->input('legal_address'),
+                    $request->input('bank_account'),
+                    $request->input('contact_phone')
+                ]);
+                $provider = Provider::where(function ($q) use ($request) {
+                    $q->where('name', $request->input('name'));
+                    $q->where('legal_address', $request->input('legal_address'));
+                    $q->where('bank_account', $request->input('bank_account'));
+                    $q->where('contact_phone', $request->input('contact_phone'));
+                })->first();
+                if ($request->input('products') !== null) {
                 $products = $request->input('products');
-                foreach ($products as $product) {
-                    if (! isset($product)) continue;
-                    DB::select('call refresh_providers_products(?,?)', [
-                        $product,
-                        $provider->id
-                    ]);
+                    foreach ($products as $product) {
+                        if (! isset($product)) continue;
+                        DB::select('call refresh_providers_products(?,?)', [
+                            $product,
+                            $provider->id
+                        ]);
+                    }
                 }
-            }
-            return response()->json([
+                return response()->json([
                 'status' => 'success'
-            ], 200);
+                ], 200);
+            }
+            else {
+                //dd('такой name и bank_account заняты');
+            }
         } catch (\Exception $error) {
             return response()->json([
                 'status' => 'error',
@@ -90,6 +97,26 @@ class ProviderController extends Controller
             'status' => 'success',
             'provider' => $provider
         ], 200);
+    }
+
+    public function is_exist_name(string $name)
+    {
+        $provider = Provider::where('name', $name)->first();
+        if ($provider === null) {
+            return response()->json(false, 200);
+        } else {
+            return response()->json(true, 200);
+        }
+    }
+
+    public function is_exist_baccount(string $bank_account)
+    {
+        $provider = Provider::where('bank_account', $bank_account)->first();
+        if ($provider === null) {
+            return response()->json(false, 200);
+        } else {
+            return response()->json(true, 200);
+        }
     }
 
     public function form_info()

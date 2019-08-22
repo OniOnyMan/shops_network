@@ -12,11 +12,11 @@
                 </div>
                 <div class="form-group">
                     <label for="">Банковский счёт</label>
-                    <input type="text" class="form-control" v-model="provider.bank_account">
+                    <input type="number" class="form-control" v-model="provider.bank_account">
                 </div>
                 <div class="form-group">
                     <label for="">Контактный телефон</label>
-                    <input type="text" class="form-control" v-model="provider.contact_phone">
+                    <input type="number" class="form-control" v-model="provider.contact_phone">
                 </div>
                 <div class="form-group">
                     <label for="">Продукты</label>
@@ -70,7 +70,7 @@
                 if (this.provider.name === undefined || this.provider.name === null || ! this.provider.name) {
                     this.$swal('Ошибка!', 'Вы не указали наименование поставщика', 'error');
                     return false;
-                }
+                } 
                 if (this.provider.legal_address === undefined || this.provider.legal_address === null || ! this.provider.legal_address) {
                     this.$swal('Ошибка!', 'Вы не указали юридический адрес поставщика', 'error');
                     return false;
@@ -78,17 +78,16 @@
                 if (this.provider.bank_account === undefined || this.provider.bank_account === null || ! this.provider.bank_account) {
                     this.$swal('Ошибка!', 'Вы не указали бановские реквизиты поставщика', 'error');
                     return false;
-                }
+                }   
                 if (this.provider.contact_phone === undefined || this.provider.contact_phone === null || ! this.provider.contact_phone) {
                     this.$swal('Ошибка!', 'Вы не указали контактный телефон поставщика', 'error');
                     return false;
                 }
-                return true;
-
+                return true;                
             },
 
             async save() {
-                if (! this.validate()) return false;
+                if (this.validate()) 
                 if  (this.provider.id) {
                     const response = await axios.post('/providers/update/' + this.provider.id, {...this.provider} );
                     if (response.data.status === 'error') {
@@ -101,16 +100,29 @@
                         return true;
                     }
                 } else {
-                    const response = await axios.post('/providers/create', {...this.provider} );
-                    if (response.data.status === 'error') {
-                        this.$swal('Ошибка', 'Произошла ошибка. Повторите позднее', 'error');
+                    const response = await axios.get('/providers/is_exist_baccount/' + this.provider.bank_account);
+                    if (response.data === true) {
+                        this.$swal('Ошибка', 'Произошла ошибка. Такие банковские реквизиты уже используются', 'error');
                         return false;
+                    } else {
+                        const response = await axios.get('/providers/is_exist_name/' + this.provider.name);
+                        if (response.data === true) {
+                            this.$swal('Ошибка', 'Произошла ошибка. Такое наименование уже используется', 'error');
+                            return false;
+                        } else {
+                            const response = await axios.post('/providers/create', {...this.provider} );
+                            if (response.data.status === 'error') {
+                            this.$swal('Ошибка', 'Произошла ошибка. Повторите позднее', 'error');
+                            return false;
+                            }
+                            else if (response.data.status === 'success') {
+                            this.$swal('Успешно', 'Сведения о поставщике успешно добавлены', 'success');
+                            this.$router.push('/providers');
+                            return true;
+                            }
+                        }
                     }
-                    else if (response.data.status === 'success') {
-                        this.$swal('Успешно', 'Сведения о поставщике успешно добавлены', 'success');
-                        this.$router.push('/providers');
-                        return true;
-                    }
+                    
                 }
             },
 

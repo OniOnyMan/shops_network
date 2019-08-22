@@ -37,6 +37,26 @@ class ShopController extends Controller
         }
     }
 
+    public function is_exist_name(string $name)
+    {
+        $provider = Shop::where('name', $name)->first();
+        if ($provider === null) {
+            return response()->json(false, 200);
+        } else {
+            return response()->json(true, 200);
+        }
+    }
+    
+    public function is_exist_baccount(string $bank_account)
+    {
+        $provider = Shop::where('bank_account', $bank_account)->first();
+        if ($provider === null) {
+            return response()->json(false, 200);
+        } else {
+            return response()->json(true, 200);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
