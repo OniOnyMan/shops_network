@@ -6,6 +6,11 @@
 /public/assets/plugins/*
 
 #
+# It's necessary because yarn refuses to build with this .lock file.
+#
+yarn.lock
+
+#
 # Copied from https://github/gitignore/Laravel.gitignore
 #
 /vendor/
